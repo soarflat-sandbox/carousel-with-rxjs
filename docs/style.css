@@ -1,0 +1,100 @@
+.product-card {
+  width: 100%;
+  box-sizing: border-box;
+  user-select: none;
+}
+.product-card__inner {
+  background: #fff;
+  padding: 8px;
+  border: 1px solid #c5cbd3;
+}
+.product-card__poster {
+  position: relative;
+  width: 100%;
+  padding-bottom: 50%;
+  font-size: 0;
+  overflow: hidden;
+}
+.product-card__image {
+  position: absolute;
+  width: 100%;
+}
+.product-card__title {
+  margin: 10px 0 0;
+  font-size: 16px;
+}
+.product-card__genre-list {
+  padding: 0;
+  margin: 5px 0 0;
+  list-style: none;
+  font-size: 0;
+  color: #8fa6c0;
+}
+.product-card__genre-item {
+  position: relative;
+  display: inline-block;
+  padding-right: 10px;
+  font-size: 14px;
+}
+.product-card__genre-item:after {
+  position: absolute;
+  display: inline-block;
+  content: '/';
+  right: 3px;
+}
+.product-card__genre-item:last-child:after {
+  display: none;
+}
+
+.swiper {
+  overflow: hidden;
+  margin-top: 10px;
+  max-width: 640px;
+}
+.swiper__title {
+  font-size: 18px;
+  margin: 20px 0 0;
+}
+.swiper__list {
+  margin: 10px -5px;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+  font-size: 0;
+  overflow: visible;
+}
+.swiper__item {
+  width: 100%;
+  padding: 0 5px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+.swiper__indicator {
+  text-align: center;
+}
+.swiper__indication {
+  width: 8px;
+  height: 8px;
+  background: #8fa6c0;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
+}
+.swiper__indication--active {
+  background: #000;
+}
+.swiper__control {
+  margin: 5px 0 0;
+  font-size: 0;
+}
+.swiper__button {
+  width: 50px;
+  background: #0877d6;
+  border: 0;
+  color: #fff;
+  font-size: 11px;
+}
+.swiper__button--next {
+  float: right;
+}
