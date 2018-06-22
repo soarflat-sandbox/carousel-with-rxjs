@@ -26,19 +26,19 @@ const pointerup$ = Observable.fromEvent(window, 'pointerup', {
 const dragstart$ = Observable.fromEvent(elList, 'dragstart');
 
 // pointerdown$, pointermove$, pointerup$を利用して
-// ドラッグ中に、引数のオブジェクトに移動距離をマージするコールバック関数を配信するObservableを生成する
+// ドラッグ中に、「引数のオブジェクトに移動距離をマージする」コールバック関数をemitするObservableを生成する
 const dragging$ = pointerdown$
-  // `mergeMap`メソッドで、pointerdown中からpointerupまで、ポインタの移動距離を配信するObservableを生成する
+  // `mergeMap`メソッドで、pointerdown中からpointerupするまでのポインタの移動距離をemitするObservableを生成する
   .mergeMap(start =>
-    // `takeUntil`メソッドで、pointerup$がemitされるまで値を配信するObservableに変換
-    // `map`メソッドでスタート地点からポインタの移動距離を配信するObservableに変換
+    // `takeUntil`メソッドで、pointerup$がemitされるまで値をemitするObservableに変換
+    // `map`メソッドでスタート地点からポインタの移動距離をemitするObservableに変換
     pointermove$.takeUntil(pointerup$).map(move => move.pageX - start.pageX)
   )
-  // 移動距離を引数のオブジェクトにマージするコールバック関数を配信するObservableを生成する
+  // 「移動距離を引数のオブジェクトにマージする」コールバック関数をemitするObservableを生成する
   .map(deltaX => state => Object.assign({}, state, { deltaX }));
 
 // dragging$, pointerup$を利用して
-// ドラッグ終了後のindexを返すコールバック関数を配信するObservableを生成する
+// ドラッグ終了後のindexを返すコールバック関数をemitするObservableを生成する
 const dragend$ = dragging$
   // pointerup$.take(1)にすることで
   // switchMapが再び実行されるまで、pointerupイベントが何回発生しても
@@ -47,7 +47,7 @@ const dragend$ = dragging$
   // dragging$ Observableから最後に配信された値（今回はコールバック関数）を取得
   .withLatestFrom(dragging$)
   // dragging$ Observableから配信されたコールバックを関数を引数にして
-  // indexを返すコールバック関数を配信するObservableを生成する
+  // indexを返すコールバック関数をemitするObservableを生成する
   .map(([, fn]) => ({ index }) => {
     const { deltaX } = fn();
     index = index < count && deltaX < -50 ? index + 1 : index;
@@ -56,27 +56,32 @@ const dragend$ = dragging$
   });
 
 /**
- * next イベントのコールバック関数を返す
+ * NEXTボタンををクリック時、インデックスを更新し、それを返すコールバック関数をemitするObservable
  */
-const next = () => ({ index }) => ({
+const next$ = Observable.fromEvent(elNext, 'click').map(() => ({ index }) => ({
   index: index < count ? index + 1 : 0,
-});
-const next$ = Observable.fromEvent(elNext, 'click').map(next);
+}));
 
 /**
- * prev イベントのコールバック関数を返す
+ * PREVボタンををクリック時、インデックスを更新し、それを返すコールバック関数をemitするObservable
  */
-const prev = () => ({ index }) => ({
-  index: index > 0 ? index - 1 : count,
-});
-const previous$ = Observable.fromEvent(elPrevious, 'click').map(prev);
+const previous$ = Observable.fromEvent(elPrevious, 'click').map(
+  () => ({ index }) => ({
+    index: index > 0 ? index - 1 : count,
+  })
+);
 
+/**
+ * インディケータをクリック時、クリックしたインディケータのインデックスを返すコールバック関数をemitするObservable
+ */
 const indication$ = Observable.fromEvent(elIndicator, 'click')
   .map(el => el.target.closest('.swiper__indication'))
   .filter(el => el !== null)
   .map(el => () => ({ index: parseInt(el.dataset.index, 10) }));
 
 Observable.merge(dragging$, dragend$, previous$, next$, indication$)
+  // state の初期値は`{ deltaX: 0, index: 0 }`
+  // `changeFn`には各Observableからemitされたコールバック関数が参照される
   .scan((state, changeFn) => changeFn(state), { deltaX: 0, index: 0 })
   .subscribe(({ deltaX, index }) => {
     const width = -(
@@ -96,6 +101,13 @@ dragstart$
   .filter(e => e.target.closest('.product-card__image'))
   .subscribe(e => e.preventDefault());
 
+/**
+ * elementのtranslateXを更新する
+ * @param {*} element
+ * @param {*} deltaX
+ * @param {*} duration
+ * @param {*} callback
+ */
 function translateX(element, deltaX, duration = 0, callback = null) {
   element.style.transition = `transform ${duration}s`;
   element.style.transform = `translate3d(${deltaX}px, 0, 0)`;
@@ -104,6 +116,11 @@ function translateX(element, deltaX, duration = 0, callback = null) {
   }
 }
 
+/**
+ * インディケータのViewを更新する
+ * @param {*} element
+ * @param {*} index
+ */
 function updateIndicator(element, index) {
   element
     .querySelector('.swiper__indication--active')
